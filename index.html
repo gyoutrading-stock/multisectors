@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GIYONO MULTI-SECTOR COMMAND v12.1</title>
+    <style>
+        :root { --neon: #bc13fe; --safety: #00ff55; --danger: #ff4444; --warn: #ffd700; }
+        body { background: #000; color: #0f0; font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 15px; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: 350px 1fr 350px; gap: 15px; height: 95vh; }
+        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(188, 19, 254, 0.1); }
+        h2 { font-size: 13px; color: var(--neon); text-align: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-top: 0; letter-spacing: 1px; }
+        
+        .selector { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 15px; }
+        .sel-btn { padding: 10px; background: #222; border: 1px solid #444; color: #fff; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.3s; }
+        .sel-btn.active { background: var(--neon); border-color: var(--neon); color: white; box-shadow: 0 0 15px var(--neon); }
+        .sel-btn.trap { color: var(--danger); }
+        .sel-btn.trap.active { background: var(--danger); border-color: var(--danger); }
+        
+        input { width: 100%; background: #000; border: 1px solid #444; color: #0f0; padding: 12px; margin: 5px 0; border-radius: 4px; font-weight: bold; font-size: 20px; text-align: center; }
+        .metric { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
+        .label { color: #888; font-size: 11px; text-transform: uppercase; }
+        .value { color: #fff; font-weight: bold; font-size: 14px; }
+        
+        #signal-box { padding: 20px; text-align: center; font-size: 22px; font-weight: bold; border-radius: 6px; margin-top: 15px; border: 2px solid; text-transform: uppercase; }
+        .safe { background: #001a05; color: var(--safety); border-color: var(--safety); box-shadow: 0 0 15px rgba(0,255,85,0.2); }
+        .monitor { background: #1a1a00; color: var(--warn); border-color: var(--warn); }
+        .dead { background: #1a0000; color: var(--danger); border-color: var(--danger); }
+        
+        #chart-container { flex-grow: 1; background: #000; border-radius: 8px; border: 1px solid #222; }
+        .audit-log { margin-top: 20px; font-size: 11px; line-height: 1.6; color: #ddd; background: #000; padding: 10px; border-radius: 4px; min-height: 120px; }
+    </style>
+</head>
+<body>
+
+<div class="grid">
+    <div class="card">
+        <h2>MISSION CONTROL: SIKLUS BIDANG</h2>
+        <div class="selector">
+            <button class="sel-btn active" onclick="setMode('ASRI')">ASRI (PROPERTI)</button>
+            <button class="sel-btn" onclick="setMode('LPCK')">LPCK (KAWASAN)</button>
+            <button class="sel-btn" onclick="setMode('LPPF')">LPPF (RITEL)</button>
+            <button class="sel-btn trap" onclick="setMode('BAJA')">BAJA (TRAP)</button>
+        </div>
+        
+        <label class="label">INPUT HARGA LIVE MARKET</label>
+        <input type="number" id="curPrice" value="165" oninput="calculate()">
+        
+        <div class="metric"><span class="label">EMITEN:</span><span class="value" id="dispTkr">-</span></div>
+        <div class="metric"><span class="label">BANDAR AVG:</span><span class="value" id="dispAvg">-</span></div>
+        <div class="metric"><span class="label">PBV (LANTAI):</span><span class="value" id="dispPbv">-</span></div>
+        <div class="metric"><span class="label">LANTAI ASLI:</span><span class="value" id="dispFloor" style="color:var(--safety)">-</span></div>
+        
+        <div id="signal-box" class="safe">READY</div>
+    </div>
+
+    <div class="card" style="padding:0;">
+        <div id="chart-container"></div>
+    </div>
+
+    <div class="card">
+        <h2>FORENSIC AUDIT & ROTASI</h2>
+        <div class="metric"><span class="label">STATUS VALUASI:</span><span class="value" id="dispValType">-</span></div>
+        <div class="metric"><span class="label">MARGIN OF SAFETY:</span><span class="value" id="dispGap">-</span></div>
+        <div class="metric"><span class="label">BARRIER (MA50):</span><span class="value" id="dispMA">-</span></div>
+        <div class="metric"><span class="label">PROBABILITAS:</span><span class="value" id="dispProb" style="font-size: 24px; color: var(--safety);">0%</span></div>
+        
+        <div id="auditLog" class="audit-log">
+            Menganalisa data bidang...
+        </div>
+        
+        <div style="margin-top: auto; font-size: 9px; color: #444; text-align: center; border-top: 1px solid #222; padding-top: 10px;">
+            DASHBOARD KHUSUS BAPAK GIYONO - v12.1 SIKLUS ANOMALI
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script>
+    const dataMap = {
+        'ASRI': { avg: 168, pbv: 0.42, floor: 393, ma: 169, type: 'DISCOUNT', sector: 'PROPERTI' },
+        'LPCK': { avg: 720, pbv: 0.31, floor: 2322, ma: 750, type: 'DISCOUNT', sector: 'KAWASAN INDUSTRI' },
+        'LPPF': { avg: 1650, pbv: 1.25, floor: 1300, ma: 1720, type: 'CASH COW', sector: 'RITEL KONSUMER' },
+        'BAJA': { avg: 155, pbv: 8.62, floor: 18, ma: 164, type: 'BUBBLE', sector: 'STEEL (TRAP)' }
+    };
+    let currentMode = 'ASRI';
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.sel-btn').forEach(b => b.classList.remove('active'));
+        const activeBtn = Array.from(document.querySelectorAll('.sel-btn')).find(b => b.innerText.includes(mode));
+        if(activeBtn) activeBtn.classList.add('active');
+        
+        const prices = { 'ASRI': 165, 'LPCK': 710, 'LPPF': 1600, 'BAJA': 153 };
+        document.getElementById('curPrice').value = prices[mode];
+        
+        initChart(mode);
+        calculate();
+    }
+
+    function initChart(ticker) {
+        document.getElementById('chart-container').innerHTML = "";
+        new TradingView.widget({
+            "autosize": true, "symbol": "IDX:" + ticker, "interval": "D", "timezone": "Asia/Jakarta", "theme": "dark", "style": "1", "container_id": "chart-container",
+            "studies": [
+                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 50 }, "overrides": { "plot.color": "#FFFF00" } },
+                { "id": "RSI@tv-basicstudies" },
+                { "id": "MACD@tv-basicstudies" }
+            ]
+        });
+    }
+
+    function calculate() {
+        const config = dataMap[currentMode];
+        const cur = parseFloat(document.getElementById('curPrice').value);
+        const sigBox = document.getElementById('signal-box');
+        const audit = document.getElementById('auditLog');
+        
+        document.getElementById('dispTkr').innerText = currentMode + " (" + config.sector + ")";
+        document.getElementById('dispAvg').innerText = "Rp " + config.avg;
+        document.getElementById('dispPbv').innerText = config.pbv + "x";
+        document.getElementById('dispFloor').innerText = "Rp " + config.floor;
+        document.getElementById('dispMA').innerText = "Rp " + config.ma;
+        document.getElementById('dispValType').innerText = config.type;
+
+        const gap = ((config.floor - cur) / config.floor * 100);
+        document.getElementById('dispGap').innerText = (config.type !== 'BUBBLE' ? "+" + gap.toFixed(0) + "% (DISKON)" : "NEGATIF (BUBBLE)");
+        
+        let prob = 50;
+        if(config.type !== 'BUBBLE') {
+            if(cur < config.avg) prob += 20;
+            if(cur < config.ma) prob += 15;
+            document.getElementById('dispProb').style.color = "var(--safety)";
+            
+            if(cur >= config.ma) {
+                sigBox.className = "safe"; sigBox.innerText = "🔥 ENGINE START";
+                audit.innerHTML = "<b>STATUS: BREAKOUT.</b> Gajah mulai memindahkan lapak ke atas. Sektor " + config.sector + " terdeteksi akumulasi masif.";
+            } else {
+                sigBox.className = "monitor"; sigMode = "ACCUMULATING"; sigBox.innerText = "📡 ACCUMULATING";
+                audit.innerHTML = "<b>STATUS: UNDERVALUED.</b> Harga di bawah lantai gajah. Ini area 'Buy on Weakness' terbaik untuk jangka menengah.";
+            }
+        } else {
+            prob = 25;
+            document.getElementById('dispProb').style.color = "var(--danger)";
+            sigBox.className = "dead"; sigBox.innerText = "🚨 DANGER TRAP";
+            audit.innerHTML = "<b>PERINGATAN!</b> PBV 8.6x adalah kegilaan. Jangan tersandera di sini. Gajah sudah siap exit ke lantai asli Rp 18.";
+        }
+        
+        document.getElementById('dispProb').innerText = prob.toFixed(0) + "%";
+    }
+
+    window.onload = () => setMode('ASRI');
+</script>
+</body>
+</html>
