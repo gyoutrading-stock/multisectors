@@ -99,11 +99,16 @@
     function initChart(ticker) {
         document.getElementById('chart-container').innerHTML = "";
         new TradingView.widget({
-            "autosize": true, "symbol": "IDX:" + ticker, "interval": "D", "timezone": "Asia/Jakarta", "theme": "dark", "style": "1", "container_id": "chart-container",
+            "autosize": true, 
+            "symbol": "IDX:" + ticker, 
+            "interval": "15", // SAYA UBAH KE 15 MENIT AGAR LEBIH GACOR
+            "timezone": "Asia/Jakarta", 
+            "theme": "dark", 
+            "style": "1", 
+            "container_id": "chart-container",
             "studies": [
-                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 50 }, "overrides": { "plot.color": "#FFFF00" } },
-                { "id": "RSI@tv-basicstudies" },
-                { "id": "MACD@tv-basicstudies" }
+                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 50 } },
+                { "id": "RSI@tv-basicstudies" }
             ]
         });
     }
