@@ -101,14 +101,20 @@
         new TradingView.widget({
             "autosize": true, 
             "symbol": "IDX:" + ticker, 
-            "interval": "15", // SAYA UBAH KE 15 MENIT AGAR LEBIH GACOR
+            "interval": "1", // SEKARANG DEFAULT KE 1 MENIT (SANGAT LIVE)
             "timezone": "Asia/Jakarta", 
             "theme": "dark", 
             "style": "1", 
+            "locale": "id",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": false, // SAYA AKTIFKAN TOOLBAR AGAR BAPAK BISA GANTI MENIT/JAM
+            "save_image": false,
             "container_id": "chart-container",
             "studies": [
                 { "id": "MASimple@tv-basicstudies", "inputs": { "length": 50 } },
-                { "id": "RSI@tv-basicstudies" }
+                { "id": "RSI@tv-basicstudies" },
+                { "id": "MACD@tv-basicstudies" }
             ]
         });
     }
