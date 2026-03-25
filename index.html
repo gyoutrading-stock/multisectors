@@ -1,123 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>GIYONO COMMAND v12.4 - MASTER RADAR</title>
-    <style>
-        :root { --neon: #bc13fe; --safety: #00ff55; --danger: #ff4444; --warn: #ffd700; --cyan: #00ffff; }
-        body { background: #000; color: #0f0; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; overflow: hidden; }
-        .grid { display: grid; grid-template-columns: 350px 1fr 350px; gap: 15px; height: 95vh; }
-        .card { background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; }
-        h2 { font-size: 13px; color: var(--neon); text-align: center; border-bottom: 2px solid #222; padding-bottom: 10px; margin-top: 0; }
-        
-        input { width: 100%; background: #000; border: 1px solid #444; color: #0f0; padding: 12px; margin: 5px 0; border-radius: 4px; font-weight: bold; font-size: 20px; text-align: center; }
-        .metric { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; }
-        .label { color: #888; font-size: 11px; }
-        .value { color: #fff; font-weight: bold; }
-        
-        /* Indikator Baru */
-        .rsi-panel { background: #000; padding: 15px; border-radius: 6px; margin-top: 15px; text-align: center; border-left: 5px solid var(--cyan); }
-        .rsi-val { font-size: 32px; font-weight: bold; color: var(--cyan); }
-        
-        #signal-box { padding: 15px; text-align: center; font-size: 20px; font-weight: bold; border-radius: 6px; margin-top: 10px; border: 2px solid; }
-        .safe { background: #001a05; color: var(--safety); border-color: var(--safety); }
-        .warn { background: #1a1a00; color: var(--warn); border-color: var(--warn); }
-        
-        #chart-container { flex-grow: 1; border-radius: 8px; border: 1px solid #222; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Bandar Detector</title>
+
+<!-- OPEN GRAPH (WA / FB PREVIEW) -->
+<meta property="og:title" content="Smart Bandar Detector">
+<meta property="og:description" content="AI Signal Saham - Entry Akurat & Deteksi Pergerakan Bandar Secara Real-Time">
+<meta property="og:image" content="https://raw.githubusercontent.com/gyoutrading-stock/multisectors/main/assets/cover.jpg">
+<meta property="og:url" content="https://gyoutrading-stock.github.io/multisectors/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Smart Bandar Detector">
+
+<!-- IMPORTANT FOR WHATSAPP -->
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- EXTRA COMPATIBILITY -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Smart Bandar Detector">
+<meta name="twitter:description" content="AI Signal Saham - Entry Akurat & Deteksi Pergerakan Bandar Secara Real-Time">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/gyoutrading-stock/multisectors/main/assets/cover.jpg">
+
+<!-- REDIRECT TO YOUR GOOGLE SCRIPT APP -->
+<meta http-equiv="refresh" content="2; url=https://script.google.com/macros/s/AKfycby5zgiSZElpuU81SjPHMjtip-cmgkzluo4D6NMlbSRZM0WE1GwDVEJbcF4hfZAOEz-n/exec">
+
 </head>
-<body>
 
-<div class="grid">
-    <div class="card">
-        <h2>MISSION CONTROL</h2>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-bottom:10px;">
-            <button onclick="setMode('ASRI')" style="padding:10px; background:var(--neon); color:#white; border:none; cursor:pointer; font-weight:bold;">ASRI</button>
-            <button onclick="setMode('LPCK')" style="padding:10px; background:#222; color:#white; border:none; cursor:pointer; font-weight:bold;">LPCK</button>
-        </div>
-        
-        <label class="label">INPUT HARGA LIVE MARKET</label>
-        <input type="number" id="curPrice" value="165" oninput="calculate()">
-        
-        <div class="metric"><span class="label">EMITEN:</span><span class="value" id="dispTkr">-</span></div>
-        <div class="metric"><span class="label">BANDAR AVG:</span><span class="value" id="dispAvg">-</span></div>
-        <div class="metric"><span class="label">LANTAI ASLI:</span><span class="value" id="dispFloor" style="color:var(--safety)">-</span></div>
-        
-        <div class="rsi-panel">
-            <div class="label">DAILY RSI (OVERBOUGHT/SOLD)</div>
-            <div class="rsi-val" id="dispRSI">30.95</div>
-            <div class="label" id="rsiStatus" style="color:var(--safety)">OVERSOLD - GOOD TO BUY</div>
-        </div>
+<body style="font-family: Arial; text-align: center; padding-top: 50px;">
+<h2>Loading Smart Bandar Detector...</h2>
+<p>Please wait, redirecting to application...</p>
 
-        <div id="signal-box" class="safe">READY</div>
-    </div>
+<p>If not redirected, click below:</p>
+<a href="https://script.google.com/macros/s/AKfycby5zgiSZElpuU81SjPHMjtip-cmgkzluo4D6NMlbSRZM0WE1GwDVEJbcF4hfZAOEz-n/exec">
+Open App
+</a>
 
-    <div class="card" style="padding:0;">
-        <div id="chart-container"></div>
-    </div>
-
-    <div class="card">
-        <h2>MA FORENSIC PANEL</h2>
-        <div class="metric"><span><b style="color:var(--cyan)">●</b> MA 9 (FAST):</span><span class="value" id="ma9">164</span></div>
-        <div class="metric"><span><b style="color:var(--warn)">●</b> MA 50 (MID):</span><span class="value" id="ma50">169</span></div>
-        <div class="metric"><span><b style="color:var(--danger)">●</b> MA 200 (LONG):</span><span class="value" id="ma200">160</span></div>
-        
-        <div id="auditLog" style="margin-top:20px; font-size:12px; line-height:1.6; color:#ccc;">
-            Menganalisa garis pertempuran gajah...
-        </div>
-    </div>
-</div>
-
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-<script>
-    const dataMap = {
-        'ASRI': { avg: 168, pbv: 0.42, floor: 393, ma9: 164, ma50: 169, ma200: 160, rsi: 30.95 },
-        'LPCK': { avg: 720, pbv: 0.31, floor: 2322, ma9: 710, ma50: 750, ma200: 820, rsi: 35.00 }
-    };
-    let currentMode = 'ASRI';
-
-    function setMode(m) {
-        currentMode = m;
-        document.getElementById('curPrice').value = (m === 'ASRI' ? 165 : 715);
-        initChart(m);
-        calculate();
-    }
-
-    function initChart(t) {
-        document.getElementById('chart-container').innerHTML = "";
-        new TradingView.widget({
-            "autosize": true, "symbol": "IDX:" + t, "interval": "D", "timezone": "Asia/Jakarta", "theme": "dark", "container_id": "chart-container",
-            "studies": [
-                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 9 }, "overrides": { "plot.color": "#00ffff" } },
-                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 50 }, "overrides": { "plot.color": "#ffff00" } },
-                { "id": "MASimple@tv-basicstudies", "inputs": { "length": 200 }, "overrides": { "plot.color": "#ff0000" } },
-                { "id": "RSI@tv-basicstudies" }
-            ]
-        });
-    }
-
-    function calculate() {
-        const d = dataMap[currentMode];
-        const c = parseFloat(document.getElementById('curPrice').value);
-        
-        document.getElementById('dispTkr').innerText = currentMode;
-        document.getElementById('dispAvg').innerText = "Rp " + d.avg;
-        document.getElementById('dispFloor').innerText = "Rp " + d.floor;
-        document.getElementById('ma9').innerText = "Rp " + d.ma9;
-        document.getElementById('ma50').innerText = "Rp " + d.ma50;
-        document.getElementById('ma200').innerText = "Rp " + d.ma200;
-        document.getElementById('dispRSI').innerText = d.rsi;
-
-        const sig = document.getElementById('signal-box');
-        if (c > d.ma9) {
-            sig.className = "safe"; sig.innerText = "🚀 BUY CONFIRMED";
-            document.getElementById('auditLog').innerHTML = "Harga menembus MA9 (Biru). Tenaga pendekar sudah muncul. Gajah mulai gerak.";
-        } else {
-            sig.className = "warn"; sig.innerText = "📡 ACCUMULATE";
-            document.getElementById('auditLog').innerHTML = "Harga masih di bawah MA9. Waktunya cicil pelan di Lantai Gajah.";
-        }
-    }
-
-    window.onload = () => setMode('ASRI');
-</script>
 </body>
 </html>
